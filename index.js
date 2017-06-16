@@ -26,6 +26,8 @@ import {
   mapValues,
 } from 'lodash/object'
 
+const emojify = require('node-emoji')
+
 //polyfil for android
 require('string.fromcodepoint');
 
