@@ -36,6 +36,8 @@ require('string.fromcodepoint');
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint
 const charFromUtf16 = utf16 => String.fromCodePoint(...utf16.split('-').map(u => '0x' + u))
 const charFromEmojiObj = obj => charFromUtf16(obj.unified)
+const nameFromEmojiObj = obj => obj.short_name
+
 const blacklistedEmojis = ['white_frowning_face', 'keycap_star', 'eject']
 
 const isAndroid = Platform.OS == 'android'
@@ -47,6 +49,7 @@ const filteredEmojis = emoji.filter(e => isAndroid ? !!e.google : !includes(blac
 const groupedAndSorted = groupBy(orderBy(filteredEmojis, 'sort_order'), 'category')
 // convert the emoji object to a character
 const emojisByCategory = mapValues(groupedAndSorted, group => group.map(charFromEmojiObj))
+const emojisShortName = mapValues(groupedAndSorted, group => group.map(nameFromEmojiObj))
 
 const CATEGORIES = ['People', 'Nature', 'Foods', 'Activity', 'Places', 'Objects', 'Symbols', 'Flags']
 
@@ -96,27 +99,28 @@ class EmojiCategory extends Component {
 
   render() {
     let emojis = emojisByCategory[this.props.category]
+    let emojisShortNameValue = emojisShortName[this.props.category]
+
     let size = this.props.emojiSize || defaultEmojiSize
     let style = {
       fontSize: size-4,
       color: 'black',
-      height: size+4,
-      width: size+4,
+      height: size+14,
+      width: size+14,
       textAlign: 'center',
       padding: padding,
     }
 
     return (
      <View style={style.categoryOuter}>
-        <Text style={[styles.headerText, this.props.headerStyle]}>{this.props.category}</Text>
         <View style={styles.categoryInner}>
-          {emojis.map(e => 
-            <Text style={style} 
-              key={e} 
-              onPress={() => this.props.onEmojiSelected(e)}>
-              {e}
-            </Text>
-          )}
+            {emojisShortNameValue.map(e => 
+              <Text style={style} 
+                key={e} 
+                onPress={() => this.props.onEmojiSelected(`:${e}:`)}>
+                {emojify.emojify(`:${e}:`)}
+              </Text>
+            )}
         </View>    
       </View>
     )
